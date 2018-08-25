@@ -7,7 +7,7 @@ from popup import notify
 from tkinter import Tk,Label,StringVar
 import random
 
-auth = HTTPBasicAuth('vivek.jhajjar@gmail.com', 'hurtkuvkbkdbnpwr')
+auth = HTTPBasicAuth("gmail address, 'auth key')
 url='https://mail.google.com/mail/feed/atom'
 
 start_tag={'name':'author><name','email':'/name><email','summary':'summary',"title":"title"}
