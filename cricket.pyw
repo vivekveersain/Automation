@@ -1,3 +1,6 @@
+"""
+Developed by Vivek
+"""
 import requests
 from lxml import etree
 from popup import notify
