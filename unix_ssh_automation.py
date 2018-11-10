@@ -2,18 +2,19 @@
 """
 Created on Tue Oct 31 20:00:45 2017
 
-@author: vvivek
+@author: vivekarya
 """
 
 import paramiko, time, codecs, threading, os
 from datetime import datetime, timedelta
 
 class ssh():
-    def __init__(self, host = '', username = "", hdipaqa = True):
+    def __init__(self, host = '', username = ""):
         print("Connecting to: %s" % host)
         decryption = self._decrypt()
         self.client = paramiko.client.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
+        self.key_loc = r"C:\Users\vvivek\Documents\keys.txt"
         try: self.client.connect(host, 22, username, decryption, look_for_keys = False)
         except:
             print("Authentication failed.")
@@ -25,8 +26,6 @@ class ssh():
         self.openShell()
         time.sleep(1)
         self._reader()
-        self.hdipaqa = hdipaqa
-        if hdipaqa: self.cmd("sudo -i -u hdipaqa")
     
     def _reader(self):
         if self.shell != None and self.shell.recv_ready():
@@ -41,13 +40,13 @@ class ssh():
             return ''
     
     def _decrypt(self):
-        with open(r"C:\Users\vvivek\Documents\keys.txt") as f: data = f.read()
+        with open(self.key_loc) as f: data = f.read()
         return codecs.decode(bytes(data, encoding="utf-8"), 'base64').decode("utf-8")
     
     def _encrypt(self):
         data = input("Enter: ")
         if not data: return
-        with open(r"C:\Users\vvivek\Documents\keys.txt", 'wb') as f:
+        with open(self.key_loc, 'wb') as f:
             f.write(codecs.encode(bytes(data, encoding = "utf-8"), encoding="base64"))
 
     def closeConnection(self):
@@ -65,15 +64,7 @@ class ssh():
                 if self._reader() == "$ ": return
         else:
             print("Shell not opened.")
-    
-    def week_dates(self, weeknr = 1):
-        if weeknr<100: weeknr += 201800
-        weeknr = weeknr%100
-        yr_start = datetime.strptime('04-02-2018',"%d-%m-%Y")
-        week_start = yr_start + timedelta(weeks = weeknr - 1)
-        week_end = week_start + timedelta(days = 6)
-        return week_start.strftime('%Y-%m-%d') +"|"+ week_end.strftime('%Y-%m-%d')
-    
+
     def _download_mngr(self):
         while self._downloading:
             try: dwnlded = os.stat(self.trget).st_size
@@ -134,9 +125,9 @@ class AdHoc():
     def run_for(self, weeknr, public = False, local = True):
         if type(weeknr) is int: 
             self.week = weeknr
-            self.dates = self.connection.week_dates(self.week)
         else:
             self.dates = weeknr
+        self.dates = weeknr
         self.run_shell()
         if public: self.move_file()
         if local: self.move_file(local)
@@ -158,11 +149,5 @@ class AdHoc():
             with open(name) as f: data = f.read().replace(",","^").replace("|",",")
             with open(self.fmt + '_' + str(self.week)+".csv", "w") as f: f.write(data)
         self.connection.closeConnection()
-'''
-for fmt in ("K", "S"): 
-    for x in range(201805, 201808):
-        adhoc = AdHoc(fmt)
-        adhoc.run_for(x, False, True)
-'''
 
 input("\n\nComplete...")
